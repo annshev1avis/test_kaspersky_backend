@@ -67,13 +67,12 @@ def test_empty_file(analyzer):
     assert result.lemma_stats == {}
 
 
-def test_invalid_bytes_are_ignored(analyzer):
+def test_invalid_bytes_are_not_allowed(analyzer):
     content = b"\xff\xfe dom\n"
     file_obj = BytesIO(content)
 
-    result = analyzer.analyze(file_obj)
-
-    assert "dom" in result.lemma_stats
+    with pytest.raises(ValueError):
+        analyzer.analyze(file_obj)
 
 
 def test_multiple_lines_sparse_counts(analyzer):

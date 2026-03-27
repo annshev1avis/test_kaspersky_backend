@@ -44,13 +44,13 @@ class ExcelExporter:
                 ]
             )
         
-        with NamedTemporaryFile(suffix=".xlsx") as temp_file:
+        with NamedTemporaryFile(suffix=".xlsx", delete=False) as temp_file:
             output_path = Path(temp_file.name)
             
         workbook.save(output_path)
         return str(output_path)
         
-    def _line_counts_to_str(self, line_counts: dict[int, int], total_lines=int):
+    def _line_counts_to_str(self, line_counts: dict[int, int], total_lines: int):
         """Собирает строку со статистикой по строкам.
         Например: '0,11,32,0,0,3'.
 

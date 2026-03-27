@@ -62,7 +62,10 @@ class FileAnalyzer:
         result = AnalysisResult()
         
         for line_index, raw_line in enumerate(file):
-            line = raw_line.decode("utf-8", errors="ignore")
+            try:
+                line = raw_line.decode("utf-8").strip()
+            except UnicodeDecodeError:
+                raise ValueError("Должен быть передан текстовый файл в кодировке utf-8")
             words = _extract_words(line)
             
             for word in words:

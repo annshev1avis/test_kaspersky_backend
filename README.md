@@ -34,14 +34,18 @@
 1. Клонировать репозиторий
 
 ```
-git clone <repo_url>
-cd <repo_name>
+git clone https://github.com/annshev1avis/test_kaspersky_backend
+cd test_kaspersky_backend
 ```
 
 2. Создать виртуальное окружение
 
 ```
-python -m venv venv
+Windows:
+py -m venv venv
+
+Linux/MacOS:
+python3 -m venv venv
 ```
 
 3. Активировать виртуальное окружение

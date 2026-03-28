@@ -1,9 +1,11 @@
+import asyncio
 from io import BytesIO
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
 
 from app.main import app
-
+from app.report.router import MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES
+import app.report.router as report_router_module
 
 client = TestClient(app)
 
@@ -70,3 +72,33 @@ def test_export_report_returns_400_for_non_utf8_file():
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Должен быть передан текстовый файл в кодировке utf-8"}
+    
+
+def test_export_report_returns_413_for_too_large_file():
+    oversized_content = b"a" * (MAX_FILE_SIZE_BYTES + 1)
+
+    response = client.post(
+        "/public/report/export",
+        files={"file": ("large.txt", oversized_content, "text/plain")},
+    )
+
+    assert response.status_code == 413
+    assert f"Размер файла не должен превышать {MAX_FILE_SIZE_MB} МБ" in response.json()["detail"]
+
+
+def test_export_report_returns_503_when_server_is_overloaded(monkeypatch):
+    monkeypatch.setattr(
+        report_router_module,
+        "report_semaphore",
+        asyncio.Semaphore(0),
+    )
+
+    response = client.post(
+        "/public/report/export",
+        files={"file": ("input.txt", "Привет\n".encode("utf-8"), "text/plain")},
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Сервер временно перегружен. Попробуйте снова через пару минут"
+    }
